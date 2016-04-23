@@ -93,15 +93,15 @@
             }
         }
 
-        var view = "index";
+        var view = "spells";
 
         function changeView() {
-            if (view=="index") {
+            if (view=="spells") {
                 view = "spellbooks";
                 $("#changeView").html("View Spell List");
                 generateSpellbooks();
             } else {
-                view = "index";
+                view = "spells";
                 $("#changeView").html("View Spellbook Library");
                 generateTable();
             }
@@ -194,7 +194,7 @@
         function generateTable() {
             //sort based on sort variable and filter out those not allowed by isShown
             var sortable=[];
-            for (var key in index) if (index.hasOwnProperty(key) && isShown(index[key])) sortable.push([key, index[key]]);
+            for (var key in spells) if (spells.hasOwnProperty(key) && isShown(spells[key])) sortable.push([key, spells[key]]);
             sortable.sort(function(a, b) {
                 return (reverse ? -1 : 1) * (a[1][sort] < b[1][sort] ? -1 : a[1][sort] > b[1][sort] ? 1 : 0); //if reverse is true, sort in the opposite direction.
             });
