@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Spells</title>
+    <link rel="stylesheet" href="resource/spellbook.css">
+    <style>
+        th, td {
+            padding-bottom: 1em;
+        }
+    </style>
+    <script src="resource/jquery.min.js"></script>
+    <script src="resource/jquery.cookie.min.js"></script>
+    <script>
+        var spells = {};
+        $.getJSON("../resource/dnd/spells.json", function(data) {
+            spells = data;
+            generatePage();
+        });
+
+        String.prototype.replaceAll = function(search, replacement) {
+            var target = this;
+            return target.replace(new RegExp(search, 'g'), replacement);
+        };
+
+        function sl(n) {
+            if(!n instanceof String) {
+                n = n.toString();
+            }
+            return n.replaceAll(" ", "-").replaceAll("'", "").replaceAll("\\(", "").replaceAll("\\)", "").replaceAll("/", "");
+        }
+
+        function addSpell(s) {
+            if (typeof $.cookie("spellbook") == "undefined") spellbook = [];
+            else var spellbook = JSON.parse($.cookie("spellbook"));
+            if (hasSpell(s)) spellbook.splice(spellbook.indexOf(s), 1);
+            else spellbook.push(s);
+            $.cookie("spellbook", JSON.stringify(spellbook), {expires: 100, path: '/'});
+        }
+
+        function hasSpell(s) {
+            if (typeof $.cookie("spellbook") == "undefined") return false;
+            var spellbook = JSON.parse($.cookie("spellbook"));
+            return spellbook.indexOf(s)!=-1;
+        }
+
+        function getSpells() {
+            var spellbook = [];
+            if (typeof $.cookie("spellbook") == "undefined") spellbook = [];
+            else spellbook = JSON.parse($.cookie("spellbook"));
+            return spellbook;
+        }
+
+        function clearSpells() {
+            if (confirm("Are you sure you want to clear the current spellbook?")) {
+                $.removeCookie("spellbook");
+                location.assign(location.href.substring(0,location.href.length-"/spellbook".length));
+            }
+        }
+
+        function getOrdinal(n) {
+            var s=["th","st","nd","rd"],
+                    v=n%100;
+            return n+(s[(v-20)%10]||s[v]||s[0]);
+        }
+
+        function generatePage() {
+            var ans = "<table>";
+
+            var spellbook = getSpells();
+
+            var toRow = 4;
+
+            for (var i = 0; i<spellbook.length; i++) {
+                var name = spellbook[i];
+                var card = generateCard(name);
+
+                if (i!=0 && i%toRow==0) ans+="</tr>";
+                if (i%toRow==0) ans+="<tr>";
+                ans+="<td>";
+                ans+=card;
+                ans+="</td>";
+
+            }
+
+            ans+="</table>";
+
+            $(".table").html(ans);
+        }
+
+        var colors = {
+            "Abjuration": "#e69900",
+            "Conjuration": "darkblue",
+            "Divination": "purple",
+            "Enchantment": "darkgreen",
+            "Evocation": "maroon",
+            "Illusion": "dodgerblue",
+            "Necromancy": "#000000",
+            "Transmutation": "#003300"
+        };
+
+        function generateCard(name) {
+            var spell = spells[name];
+            var level = spell["level"];
+            var fill = "<span class='card-fill'></span>";
+            var ruler = '<svg class="card-ruler" height="1" width="100" viewBox="0 0 100 1" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">    <polyline points="0,0 100,0.5 0,1" fill="'+colors[spell["school"]]+'"></polyline></svg>';
+            var title = level=="0" ? spell["school"]+" cantrip" : getOrdinal(level)+" level "+spell["school"].toLowerCase();
+            var ans = "<div class='card "+spell["school"].toLowerCase()+"'>";
+
+                ans+="<div class='card-title'>"+spell["name"]+"</div>";
+
+                ans+="<div class='card-content-container'>";
+
+                    ans+="<div class='card-element card-subtitle'>"+title+"</div>";
+                    ans+=ruler;
+                    ans+="<div class='card-element card-property-line'><h4 class='card-property-name'>Casting Time </h4><p class='card-p card-property-text'>"+spell["casting_time"]+"</p></div>";
+                    ans+="<div class='card-element card-property-line'><h4 class='card-property-name'>Range </h4><p class='card-p card-property-text'>"+spell["range"]+"</p></div>";
+                    ans+="<div class='card-element card-property-line'><h4 class='card-property-name'>Components </h4><p class='card-p card-property-text'>"+spell["components"]+"</p></div>";
+                    ans+=ruler;
+                    ans+=fill;
+                    ans+="<div class='card-element card-description-line'><p class='card-p card-description-text'>"+spell["description"]+"</p></div>";
+                    ans+=fill;
+                    ans+="<h3 class='card-section'>At higher levels</h3>";
+                    ans+="<div class='card-element card-description-line'><p class='card-p card-description-text'>"+(spell["athigherlevel"].length<2 ? "No change." : spell["athigherlevel"])+"</p></div>";
+
+                ans+="</div>";
+                ans+="<div><em class='source'>"+spell["source"]+", page "+spell["page"]+"</em></div>";
+
+            ans+="</div>";
+
+            console.log("card:"+ans);
+
+            return ans;
+        }
+
+    </script>
+</head>
+<body>
+
+    <div class="table">
+
+    </div>
+
+</body>
+</html>

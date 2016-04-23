@@ -1,0 +1,227 @@
+table, tr, td, th {
+    border: none !important;
+}
+
+body {
+    background: #333;
+}
+
+.button {
+    background-color: #777;
+    color: white;
+    padding: 2px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    border: 1.5px solid #222222;
+}
+
+.button:hover {
+    background-color: #666;
+}
+
+table, tr, th, td {
+    border-collapse: collapse;
+    border: 1px solid black;
+}
+
+.source {
+    font-size: 8.5px;
+    float:right;
+    color:white;
+    padding-top:3px;
+    margin-bottom:-6px;
+}
+
+.card {
+    width: 2.5in;
+    min-height: 3.65in;
+    border: 2mm solid;
+    border-radius: 4px;
+    box-sizing: border-box;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    font-family: 'Noto Sans', 'Myriad Pro', Calibri, Helvetica, Arial, sans-serif;
+    font-size: 8pt;
+}
+
+.abjuration {
+    color: #e69900;
+    border-color: #e69900;
+    background-color: #e69900;
+}
+
+.conjuration {
+    color: darkblue;
+    border-color: darkblue;
+    background-color: darkblue;
+}
+
+.divination {
+    color: purple;
+    border-color: purple;
+    background-color: purple;
+}
+
+.enchantment {
+    color: darkgreen;
+    border-color: darkgreen;
+    background-color: darkgreen;
+}
+
+.evocation {
+    color: maroon;
+    border-color: maroon;
+    background-color: maroon;
+}
+
+.illusion {
+    color: dodgerblue;
+    border-color: dodgerblue;
+    background-color: dodgerblue;
+}
+
+.necromancy {
+    color: #000000;
+    border-color: #000000;
+    background-color: #000000;
+}
+
+.transmutation {
+    color: #003300;
+    border-color: #003300;
+    background-color: #003300;
+}
+
+.card-title {
+    font-size: 13pt;
+    line-height: 7mm;
+    height: 8mm;
+    padding-left: 2mm;
+    font-family: Lora, 'Calisto MT', 'Bookman Old Style', Bookman, 'Goudy Old Style', Garamond, 'Hoefler Text', 'Bitstream Charter', Georgia, serif;
+    font-variant: small-caps;
+    font-weight: bold;
+    background-color: inherit;
+    color: white;
+}
+
+.card-content-container {
+    padding: 1mm 2mm 2mm;
+    border-radius: 2mm;
+    margin-top: 0;
+    background-color: white;
+    border-color: inherit;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    font-size: inherit;
+}
+
+.card-subtitle {
+    height: 18px;
+    line-height: 18px;
+    margin-bottom: 0.0em;
+    font-family: 'Noto Sans', 'Myriad Pro', Calibri, Helvetica, Arial, sans-serif;
+    font-size: 10pt;
+    font-style: italic;
+}
+
+.card-ruler {
+    width: 100%;
+    height: 1.0mm;
+    margin-top: 0.3em;
+    margin-bottom: 0.3em;
+}
+
+.card-property-line {
+    text-indent: -1em;
+    margin-left: 1em;
+    font-size: inherit;
+    color: black;
+}
+
+.card-property-name {
+    display: inline;
+    font-size: inherit;
+}
+.card-property-text {
+    display: inline;
+}
+
+.card-section {
+    border-bottom: 1px solid;
+    font-size: 10pt;
+    font-variant: small-caps;
+    font-weight: normal;
+    letter-spacing: 1px;
+    margin: 0;
+    border-color: inherit;
+}
+
+.card-section + .card-element {
+    margin-top: 0.3em;
+}
+
+.card-p {
+
+}
+
+.card-fill {flex: 1 1 0;}
+
+.card-description-line {
+    margin-top: 0.5em;
+    margin-bottom: 0.0em;
+    font-size: inherit;
+    color: black;
+}
+.card-description-name {
+    display: inline;
+    font-size: inherit;
+    font-style: italic;
+}
+.card-description-name::after {
+    content: ".";
+}
+
+.card-description-text {
+    display: inline;
+}
+
+.card-box {
+    display: inline;
+    height: 10mm;
+    width: 10mm;
+    margin-right: 0.3em;
+}
+
+.card-stats {
+    width: 100%
+}
+
+.card-stats-header {
+    text-align: center;
+    padding: 0;
+    width: 16.6%;
+}
+
+.card-stats-cell {
+    text-align: center;
+    padding: 0;
+}
+
+.card-bullet-line {
+    font-size: inherit;
+    color: black;
+    padding-left: 16px;
+    padding-bottom: 0;
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
+.card-bullet {
+    margin-bottom: 0;
+    margin-top: 0;
+    font-size: inherit;
+}

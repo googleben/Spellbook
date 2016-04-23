@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Spells</title>
+    <link rel="stylesheet" href="resource/spells.css">
+    <script src="resource/jquery.min.js"></script>
+    <script src="resource/jquery.cookie.min.js"></script>
+    <script>
+        var spells = {};
+        $.getJSON("resource/spells.json", function(data) {
+            spells = data;
+            generateTable();
+        });
+
+        String.prototype.replaceAll = function(search, replacement) {
+            var target = this;
+            return target.replace(new RegExp(search, 'g'), replacement);
+        };
+        Array.prototype.remove = function(from, to) {
+            var rest = this.slice((to || from) + 1 || this.length);
+            this.length = from < 0 ? this.length + from : from;
+            return this.push.apply(this, rest);
+        };
+
+        function sl(n) {
+            if(!n instanceof String) {
+                n = n.toString();
+            }
+            return n.replaceAll(" ", "-").replaceAll("'", "").replaceAll("\\(", "").replaceAll("\\)", "").replaceAll("/", "");
+        }
+
+        function hide(id) {
+            $("#full-"+id).toggle();
+            var e = $("#"+id);
+            e.html(e.html()=="Show" ? "Hide" : "Show");
+        }
+
+        var sort = "name";
+        var reverse = false;
+
+        function noHide(element) {
+            return true;
+        }
+
+        var filters = {
+            "default": noHide
+        };
+
+        function isShown(element) {
+            for (var filter in filters) {
+                if (!filters[filter](element)) return false;
+            }
+            return true;
+        }
+
+        function setFilter(filter, func) {
+            console.log(filter);
+            filters[filter] = func;
+            generateTable();
+        }
+
+        function setSort(s) {
+            if (sort==s) reverse = !reverse;
+            sort = s;
+            generateTable();
+        }
+
+        function addSpell(s) {
+            var spellbook = getSpells();
+            if (hasSpell(s)) spellbook.splice(spellbook.indexOf(s), 1);
+            else spellbook.push(s);
+            $.cookie("spellbook", JSON.stringify(spellbook), {expires: 100, path: '/'});
+        }
+
+        function hasSpell(s) {
+            if (typeof $.cookie("spellbook") == "undefined") return false;
+            var spellbook = JSON.parse($.cookie("spellbook"));
+            return spellbook.indexOf(s)!=-1;
+        }
+
+        function getSpells() {
+            var spellbook = [];
+            if (typeof $.cookie("spellbook") == "undefined") spellbook = [];
+            else spellbook = JSON.parse($.cookie("spellbook"));
+            return spellbook;
+        }
+
+        function clearSpells() {
+            if (confirm("Are you sure you want to clear the current spellbook?")) {
+                $.removeCookie("spellbook");
+                location.reload();
+            }
+        }
+
+        var view = "index";
+
+        function changeView() {
+            if (view=="index") {
+                view = "spellbooks";
+                $("#changeView").html("View Spell List");
+                generateSpellbooks();
+            } else {
+                view = "index";
+                $("#changeView").html("View Spellbook Library");
+                generateTable();
+            }
+        }
+
+        function saveSpellbook(name) {
+            var spellbooks = getSpellbooks();
+            var sb = getSpells();
+            var contains = false;
+            for (var i = 0; i<spellbooks.length; i++) {
+                var s = spellbooks[i];
+                if (s[0]==name) {
+                    s[1] = sb;
+                    contains = true;
+                }
+            }
+            if (!contains) {
+                var a = [];
+                a.push(name);
+                a.push(sb);
+                spellbooks.push(a);
+            }
+            $.cookie("spellbooks", JSON.stringify(spellbooks), {expires: 100, path: '/'});
+            generateSpellbooks();
+        }
+
+        function getSpellbooks() {
+            var spellbooks = [];
+            if ($.cookie("spellbooks") == undefined) spellbooks = [];
+            else spellbooks = JSON.parse($.cookie("spellbooks"));
+            return spellbooks;
+        }
+
+        function deleteSpellbook(name) {
+            var spellbooks = getSpellbooks();
+            if (!confirm("Are you sure you want to delete spellbook \""+name+"\"?")) return;
+            for (var i = 0; i<spellbooks.length; i++) {
+                var sb = spellbooks[i];
+                if (sb[0]==name) spellbooks.remove(i);
+            }
+            $.cookie("spellbooks", JSON.stringify(spellbooks), {expires: 100, path: '/'});
+            generateSpellbooks();
+        }
+
+        function saveCurrentBook() {
+            var name = prompt("Choose a name for the spellbook.", "My Spellbook");
+            if (name==null || name.length==0) return;
+            saveSpellbook(name);
+        }
+
+        function loadSpellbook(name) {
+            if (!confirm("Are you sure you want to load spellbook \""+name+"\"? This will clear the current spellbook.")) return;
+            var spellbooks = getSpellbooks();
+            for (var i = 0; i<spellbooks.length; i++) {
+                if (spellbooks[i][0]==name) {
+                    $.cookie("spellbook", JSON.stringify(spellbooks[i][1]));
+                    generateSpellbooks();
+                    return;
+                }
+            }
+        }
+
+        function generateSpellbooks() {
+            var spellList = getSpells();
+            var ans = "";
+            var spellbooks = getSpellbooks();
+
+            ans+="<div class='spellbook'><h1 class='sb-name'><button onclick='saveCurrentBook();' class='button' style='position: relative; top: 2.5em;'>Save Spellbook As...</button><button onclick='clearSpells();' class='button' style='position: relative; top: 2.5em;'>Clear Spells</button><span style='text-align: center; display: inline-block; width: 100%'>Current Spellbook</span></h1><div style='padding-bottom: 1em;'></div>";
+            ans+=generateSpellNames(spellList);
+
+            for (var i = 0; i<spellbooks.length; i++) {
+                var sb = spellbooks[i];
+                ans+="<div class='spellbook'><h1 class='sb-name'><button onclick='deleteSpellbook(\""+sb[0]+"\");' class='button' style='position: relative; top: 2.5em;'>Delete Spellbook</button><button class='button' style='position: relative; top: 2.5em;' onclick='loadSpellbook(\""+sb[0]+"\");'>Load Spellbook</button> <span style='text-align: center; display: inline-block; width: 100%'>"+sb[0]+"</span></h1><div style='padding-bottom: 1em;'></div>";
+                ans+=generateSpellNames(sb[1]);
+            }
+
+            $(".table").html(ans);
+        }
+
+        function generateSpellNames(spellbook) {
+            if (spellbook.length==0) return "<div style='text-align: center; font-size: 1.2em; font-weight: bold; font-style: italic'>No spells!</div>";
+            var ans = "<table style='margin: auto; text-align: center;'>";
+            for (var i = 0; i<spellbook.length; i++) {
+                ans+="<tr><td style='font-size: 1.2em; font-weight: bold; font-style: italic;'>"+spellbook[i]+"</td></tr>";
+            }
+            ans+="</table>";
+            return ans;
+        }
+
+        function generateTable() {
+            //sort based on sort variable and filter out those not allowed by isShown
+            var sortable=[];
+            for (var key in index) if (index.hasOwnProperty(key) && isShown(index[key])) sortable.push([key, index[key]]);
+            sortable.sort(function(a, b) {
+                return (reverse ? -1 : 1) * (a[1][sort] < b[1][sort] ? -1 : a[1][sort] > b[1][sort] ? 1 : 0); //if reverse is true, sort in the opposite direction.
+            });
+
+            var ans = "<table><tr><th>Full</th><th class='sort' onclick='setSort(\"name\");'>Name</th><th class='sort' onclick='setSort(\"level\");'>Level</th><th class='sort' onclick='setSort(\"school\");'>School</th><th class='sort' onclick='setSort(\"classes\");'>Classes</th><th><a href='spellbook.html'>Spellbook</a></th></tr>";
+
+            for (var i = 0; i<sortable.length; i++)  {
+                var arr = sortable[i];
+                var name = arr[0];
+                var spell = arr[1];
+                ans+="<tr>";
+                ans+="<td><button onclick='hide(\""+sl(name)+"\");' id=\""+sl(name)+"\" class='button'>Show</button></td>";
+                ans+="<td class='tooltip'>"+name+"<span class='tooltiptext'>"+spell["description"]+"</span>"+"</td>";
+                ans+="<td>"+(spell["level"]==0 ? "Cantrip" : spell["level"])+"</td>";
+                ans+="<td>"+spell["school"]+"</td>";
+                ans+="<td>"+spell["classes"].toString().replaceAll(",", ", ")+"</td>";
+                ans+="<td style='text-align: center;'><button class='button' id='b-"+sl(name)+"' onclick='var r = \"Remove\"; var a = \"Add\"; addSpell(\""+name+"\"); $(\"#b-"+sl(name)+"\").html((hasSpell(\""+name+"\") ? r : a))'>"+(hasSpell(name) ? "Remove" : "Add")+"</button>";
+                ans+="</tr>";
+
+                ans+="<tr id=\"full-"+sl(name)+"\" style='display: none;'><td colspan='100%' style='width:1em;'>";
+
+                ans+="<b>Components:</b> "+spell["components"]+"<br/>";
+                ans+="<b>Duration:</b> "+spell["duration"]+"<br/>";
+                ans+="<b>Casting Time: </b>"+spell["casting_time"]+"<br/>";
+                ans+="<b>Range: </b>"+spell["range"]+"<br/>";
+                ans+="<b>Description:</b><br/>"+spell["description"]+"<br/>";
+                ans+="<b>At Higher Levels:</b><br/>"+(spell["athigherlevel"].length<2 ? "No change." : spell["athigherlevel"])+"<br/>";
+                ans+="<em style='font-size: .75em;'>Source: "+spell["source"]+", page "+spell["page"]+"</em><br/>";
+
+                ans+="</td></tr>";
+            }
+
+            ans+="</table>";
+            $(".table").html(ans);
+        }
+
+    </script>
+</head>
+<body>
+
+    <div class="selections">
+        <span id="filters">
+            Filters:
+            <select class="level">
+                <option value="-1">Level</option>
+                <option value="0">Cantrip</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+            </select>
+            <script>
+                $(".level").change(function() { var v = $(".level option:selected").val(); setFilter("level", v == "-1" ? noHide : function(e) {return e["level"] == v;}); });
+                $(".level option:selected").removeAttr("selected");
+            </script>
+            <select class="class">
+                <option>Class</option>
+                <option>Bard</option>
+                <option>Cleric</option>
+                <option>Druid</option>
+                <option>Paladin</option>
+                <option>Ranger</option>
+                <option>Sorcerer</option>
+                <option>Warlock</option>
+                <option>Wizard</option>
+            </select>
+            <script>
+                $(".class").change(function() { var v = $(".class option:selected").html(); setFilter("class", v=="Class" ? noHide : function(e) {return e["classes"].indexOf(v)>-1;});});
+                $(".class option:selected").removeAttr("selected");
+            </script>
+            <select class="school">
+                <option>School</option>
+                <option>Abjuration</option>
+                <option>Conjuration</option>
+                <option>Divination</option>
+                <option>Enchantment</option>
+                <option>Evocation</option>
+                <option>Illusion</option>
+                <option>Necromancy</option>
+                <option>Transmutation</option>
+            </select>
+            <script>
+                $(".school").change(function() { var v = $(".school option:selected").html(); setFilter("school", v=="School" ? noHide : function(e) {return e["school"]==v;});});
+                $(".school option:selected").removeAttr("selected");
+            </script>
+        </span>
+        <button class="button" onclick="clearSpells();">Clear Spells</button>
+        <button class="button" onclick="changeView();" id='changeView'>View Spellbook Library</button>
+    </div>
+
+    <div style="padding-bottom: .2em;"></div>
+
+    <div class="table">
+
+    </div>
+
+</body>
+</html>
