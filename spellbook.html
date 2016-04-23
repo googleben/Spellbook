@@ -13,7 +13,7 @@
     <script src="resource/jquery.cookie.min.js"></script>
     <script>
         var spells = {};
-        $.getJSON("../resource/dnd/spells.json", function(data) {
+        $.getJSON("resource/spells.json", function(data) {
             spells = data;
             generatePage();
         });
