@@ -2,13 +2,107 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Spells</title>
-    <link rel="stylesheet" href="resource/spells.css">
+    <!--<link rel="stylesheet" href="../resource/css/spells.css">-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
+    <style>
+        .select-wrapper span.caret {
+            top:0;
+        }
+        .sort {
+            cursor: pointer;
+        }
+        .btn {
+            background-color: #616161;
+        }
+        .btn:hover, .btn:focus {
+            background-color: #505050;
+        }
+        *:focus {
+            outline: none;
+        }
+        .card {
+            padding: 1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar-fixed">
+        <nav>
+            <div class="nav-wrapper row z-depth-4 grey darken-3">
+                <a href="#" data-activates="mobile-nav" class="button-collapse"><i class="material-icons">menu</i></a>
+
+                <form id="sorters">
+                    <div class="input-field col s2 m1 l1">
+                        <select id="level" class="c-select">
+                            <option value="-1">Level</option>
+                            <option value="0">Cantrip</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                        </select>
+                    </div>
+                    <div class="input-field col s2 m1 l1">
+                        <select id="class" class="c-select">
+                            <option>Class</option>
+                            <option>Bard</option>
+                            <option>Cleric</option>
+                            <option>Druid</option>
+                            <option>Paladin</option>
+                            <option>Ranger</option>
+                            <option>Sorcerer</option>
+                            <option>Warlock</option>
+                            <option>Wizard</option>
+                        </select>
+                    </div>
+                    <div class="input-field col s4 m2 l1">
+                        <select id="school" class="c-select">
+                            <option>School</option>
+                            <option>Abjuration</option>
+                            <option>Conjuration</option>
+                            <option>Divination</option>
+                            <option>Enchantment</option>
+                            <option>Evocation</option>
+                            <option>Illusion</option>
+                            <option>Necromancy</option>
+                            <option>Transmutation</option>
+                        </select>
+                    </div>
+                </form>
+                <a class="brand-logo center"><b><em>Spellbook</em></b></a>
+                <ul class="right hide-on-med-and-down">
+                    <li><a href="#" onclick="clearSpells();">Clear Spells</a></li>
+                    <li><a href="#" onclick="changeView('');" id="changeView">View Spellbook Library</a></li>
+                    <li><a href="spellbook.html">View Spell Cards</a></li>
+                </ul>
+                <ul class="side-nav" id="mobile-nav">
+                    <li><a href="#" onclick="clearSpells();">Clear Spells</a></li>
+                    <li><a href="#" onclick="changeView('2');" id="changeView2">View Spellbook Library</a></li>
+                    <li><a href="spellbook.html">View Spell Cards</a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+
+    <div class="table">
+    </div>
+
     <script src="resource/jquery.min.js"></script>
     <script src="resource/jquery.cookie.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
+
     <script>
+        $('select').material_select();
+        $(".button-collapse").sideNav();
         var spells = {};
-        $.getJSON("resource/spells.json", function(data) {
+        $.getJSON("../resource/spells.json", function(data) {
             spells = data;
             generateTable();
         });
@@ -67,10 +161,12 @@
         }
 
         function addSpell(s) {
-            var spellbook = getSpells();
+            var spellbook = [];
+            if (typeof $.cookie("spellbook") == "undefined") spellbook = [];
+            else spellbook = JSON.parse($.cookie("spellbook"));
             if (hasSpell(s)) spellbook.splice(spellbook.indexOf(s), 1);
             else spellbook.push(s);
-            $.cookie("spellbook", JSON.stringify(spellbook), {expires: 100, path: '/'});
+            $.cookie("spellbook", JSON.stringify(spellbook), {expires: 2147483647, path: '/'});
         }
 
         function hasSpell(s) {
@@ -81,8 +177,7 @@
 
         function getSpells() {
             var spellbook = [];
-            if (typeof $.cookie("spellbook") == "undefined") spellbook = [];
-            else spellbook = JSON.parse($.cookie("spellbook"));
+            if (!($.cookie("spellbook") === undefined)) spellbook = JSON.parse($.cookie("spellbook"));
             return spellbook;
         }
 
@@ -95,14 +190,16 @@
 
         var view = "spells";
 
-        function changeView() {
+        function changeView(s) {
             if (view=="spells") {
                 view = "spellbooks";
-                $("#changeView").html("View Spell List");
+                $("#changeView"+s).html("View Spell List");
+                $("#sorters").hide();
                 generateSpellbooks();
             } else {
                 view = "spells";
-                $("#changeView").html("View Spellbook Library");
+                $("#changeView"+s).html("View Spellbook Library");
+                $("#sorters").show();
                 generateTable();
             }
         }
@@ -124,12 +221,12 @@
                 a.push(sb);
                 spellbooks.push(a);
             }
-            $.cookie("spellbooks", JSON.stringify(spellbooks), {expires: 100, path: '/'});
+            $.cookie("spellbooks", JSON.stringify(spellbooks), {expires: 2147483647, path: '/'});
             generateSpellbooks();
         }
 
         function getSpellbooks() {
-            var spellbooks = [];
+            var spellbooks = {};
             if ($.cookie("spellbooks") == undefined) spellbooks = [];
             else spellbooks = JSON.parse($.cookie("spellbooks"));
             return spellbooks;
@@ -142,7 +239,7 @@
                 var sb = spellbooks[i];
                 if (sb[0]==name) spellbooks.remove(i);
             }
-            $.cookie("spellbooks", JSON.stringify(spellbooks), {expires: 100, path: '/'});
+            $.cookie("spellbooks", JSON.stringify(spellbooks), {expires: 2147483647, path: '/'});
             generateSpellbooks();
         }
 
@@ -169,25 +266,32 @@
             var ans = "";
             var spellbooks = getSpellbooks();
 
-            ans+="<div class='spellbook'><h1 class='sb-name'><button onclick='saveCurrentBook();' class='button' style='position: relative; top: 2.5em;'>Save Spellbook As...</button><button onclick='clearSpells();' class='button' style='position: relative; top: 2.5em;'>Clear Spells</button><span style='text-align: center; display: inline-block; width: 100%'>Current Spellbook</span></h1><div style='padding-bottom: 1em;'></div>";
-            ans+=generateSpellNames(spellList);
+            ans+="<div class='container'>";
+
+            ans+="<div class='card' style='text-align: center'><button type='button' class='btn' onclick='saveCurrentBook();'>Save Spellbook As...</button> <button type='button' class='btn' onclick='clearSpells();'>Clear Spells</button><h1 class='sb-name'>Current Spellbook</h1>";
+            ans+=generateSpellNames(spellList)+"</div>";
 
             for (var i = 0; i<spellbooks.length; i++) {
                 var sb = spellbooks[i];
-                ans+="<div class='spellbook'><h1 class='sb-name'><button onclick='deleteSpellbook(\""+sb[0]+"\");' class='button' style='position: relative; top: 2.5em;'>Delete Spellbook</button><button class='button' style='position: relative; top: 2.5em;' onclick='loadSpellbook(\""+sb[0]+"\");'>Load Spellbook</button> <span style='text-align: center; display: inline-block; width: 100%'>"+sb[0]+"</span></h1><div style='padding-bottom: 1em;'></div>";
-                ans+=generateSpellNames(sb[1]);
+                ans+="<div class='card' style='text-align: center'><button type='button' class='btn' onclick='deleteSpellbook(\""+sb[0]+"\");'>Delete Spellbook</button> <button type='button' class='btn' onclick='loadSpellbook(\""+sb[0]+"\");'>Load Spellbook</button><h1 class='sb-name'>"+sb[0]+"</h1>";
+                ans+=generateSpellNames(sb[1])+"</div>";
             }
 
+            ans+="</div><div class='col-lg-2'></div>";
+
             $(".table").html(ans);
+            $("#sort1").hide();
+            $("#sort2").hide();
+            $("#sort3").hide();
         }
 
         function generateSpellNames(spellbook) {
             if (spellbook.length==0) return "<div style='text-align: center; font-size: 1.2em; font-weight: bold; font-style: italic'>No spells!</div>";
-            var ans = "<table style='margin: auto; text-align: center;'>";
+            var ans = "<ul class='list-group' style='margin: auto; text-align: center;'>";
             for (var i = 0; i<spellbook.length; i++) {
-                ans+="<tr><td style='font-size: 1.2em; font-weight: bold; font-style: italic;'>"+spellbook[i]+"</td></tr>";
+                ans+="<li class='list-group-item' style='font-size: 1.2em; font-weight: bold; font-style: italic;'>"+spellbook[i]+"</li>";
             }
-            ans+="</table>";
+            ans+="</ul>";
             return ans;
         }
 
@@ -199,24 +303,25 @@
                 return (reverse ? -1 : 1) * (a[1][sort] < b[1][sort] ? -1 : a[1][sort] > b[1][sort] ? 1 : 0); //if reverse is true, sort in the opposite direction.
             });
 
-            var ans = "<table><tr><th>Full</th><th class='sort' onclick='setSort(\"name\");'>Name</th><th class='sort' onclick='setSort(\"level\");'>Level</th><th class='sort' onclick='setSort(\"school\");'>School</th><th class='sort' onclick='setSort(\"classes\");'>Classes</th><th><a href='spellbook.html'>Spellbook</a></th></tr>";
+            var ans = "<table class='table'><thead class='thead-inverse'><tr><th>Full</th><th class='sort' onclick='setSort(\"name\");'>Name</th><th class='sort' onclick='setSort(\"level\");'>Level</th><th class='sort' onclick='setSort(\"school\");'>School</th><th class='sort' onclick='setSort(\"classes\");'>Classes</th><th>Spellbook</th></tr></thead>";
 
             for (var i = 0; i<sortable.length; i++)  {
                 var arr = sortable[i];
                 var name = arr[0];
                 var spell = arr[1];
                 ans+="<tr>";
-                ans+="<td><button onclick='hide(\""+sl(name)+"\");' id=\""+sl(name)+"\" class='button'>Show</button></td>";
-                ans+="<td class='tooltip'>"+name+"<span class='tooltiptext'>"+spell["description"]+"</span>"+"</td>";
+                ans+="<td><button type='button' data-toggle='collapse' href='#full-"+sl(name)+"' class='btn' onclick='hide(\""+sl(name)+"\");' id=\""+sl(name)+"\" >Show</button></td>";
+                //ans+="<td><a href='#' data-activates='full-"+sl(name)+"' class='button-collapse'>test</a></td>";
+                ans+="<td data-toggle='tooltip' data-placement='right' title='"+(spell["description"].length>399 ? spell["description"].substr(0,400)+"..." : spell["description"])+"'>"+name+"</td>";
                 ans+="<td>"+(spell["level"]==0 ? "Cantrip" : spell["level"])+"</td>";
                 ans+="<td>"+spell["school"]+"</td>";
                 ans+="<td>"+spell["classes"].toString().replaceAll(",", ", ")+"</td>";
-                ans+="<td style='text-align: center;'><button class='button' id='b-"+sl(name)+"' onclick='var r = \"Remove\"; var a = \"Add\"; addSpell(\""+name+"\"); $(\"#b-"+sl(name)+"\").html((hasSpell(\""+name+"\") ? r : a))'>"+(hasSpell(name) ? "Remove" : "Add")+"</button>";
+                ans+="<td style='text-align: center;'><button type='button' class='btn'  id='b-"+sl(name)+"' onclick='var r = \"Remove\"; var a = \"Add\"; addSpell(\""+name+"\"); $(\"#b-"+sl(name)+"\").html((hasSpell(\""+name+"\") ? r : a))'>"+(hasSpell(name) ? "Remove" : "Add")+"</button>";
                 ans+="</tr>";
 
-                ans+="<tr id=\"full-"+sl(name)+"\" style='display: none;'><td colspan='100%' style='width:1em;'>";
+                ans+="<tr id=\"full-"+sl(name)+"\" class='collapse' style='display:none;'><td colspan='100%' style='width:1em;' class='row'><blockquote><div class='col l8'>";
 
-                ans+="<b>Components:</b> "+spell["components"]+"<br/>";
+                ans+="<b>Components: </b>"+spell["components"]+"<br/>";
                 ans+="<b>Duration:</b> "+spell["duration"]+"<br/>";
                 ans+="<b>Casting Time: </b>"+spell["casting_time"]+"<br/>";
                 ans+="<b>Range: </b>"+spell["range"]+"<br/>";
@@ -224,78 +329,24 @@
                 ans+="<b>At Higher Levels:</b><br/>"+(spell["athigherlevel"].length<2 ? "No change." : spell["athigherlevel"])+"<br/>";
                 ans+="<em style='font-size: .75em;'>Source: "+spell["source"]+", page "+spell["page"]+"</em><br/>";
 
-                ans+="</td></tr>";
+                ans+="</div></blockquote></td></tr>";
+                $("#sort1").show();
+                $("#sort2").show();
+                $("#sort3").show();
             }
 
             ans+="</table>";
             $(".table").html(ans);
+            $(".button-collapse")
         }
-
     </script>
-</head>
-<body>
-
-    <div class="selections">
-        <span id="filters">
-            Filters:
-            <select class="level">
-                <option value="-1">Level</option>
-                <option value="0">Cantrip</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-                <option value="9">9</option>
-            </select>
-            <script>
-                $(".level").change(function() { var v = $(".level option:selected").val(); setFilter("level", v == "-1" ? noHide : function(e) {return e["level"] == v;}); });
-                $(".level option:selected").removeAttr("selected");
-            </script>
-            <select class="class">
-                <option>Class</option>
-                <option>Bard</option>
-                <option>Cleric</option>
-                <option>Druid</option>
-                <option>Paladin</option>
-                <option>Ranger</option>
-                <option>Sorcerer</option>
-                <option>Warlock</option>
-                <option>Wizard</option>
-            </select>
-            <script>
-                $(".class").change(function() { var v = $(".class option:selected").html(); setFilter("class", v=="Class" ? noHide : function(e) {return e["classes"].indexOf(v)>-1;});});
-                $(".class option:selected").removeAttr("selected");
-            </script>
-            <select class="school">
-                <option>School</option>
-                <option>Abjuration</option>
-                <option>Conjuration</option>
-                <option>Divination</option>
-                <option>Enchantment</option>
-                <option>Evocation</option>
-                <option>Illusion</option>
-                <option>Necromancy</option>
-                <option>Transmutation</option>
-            </select>
-            <script>
-                $(".school").change(function() { var v = $(".school option:selected").html(); setFilter("school", v=="School" ? noHide : function(e) {return e["school"]==v;});});
-                $(".school option:selected").removeAttr("selected");
-            </script>
-        </span>
-        <button class="button" onclick="clearSpells();">Clear Spells</button>
-        <button class="button" onclick="changeView();" id='changeView'>View Spellbook Library</button>
-        <button class="button" onclick="location.href='spellbook.html';">View Spell Cards</button>
-    </div>
-
-    <div style="padding-bottom: .2em;"></div>
-
-    <div class="table">
-
-    </div>
-
+    <script>
+        $("#level").change(function() { var v = $("#level").find("option:selected").val(); setFilter("level", v == "-1" ? noHide : function(e) {return e["level"] == v;}); });
+        $("#level").find("option:selected").removeAttr("selected");
+        $("#class").change(function() { var v = $("#class").find("option:selected").html(); setFilter("class", v=="Class" ? noHide : function(e) {return e["classes"].indexOf(v)>-1;});});
+        $("#class").find("option:selected").removeAttr("selected");
+        $("#school").change(function() { var v = $("#school").find("option:selected").html(); setFilter("school", v=="School" ? noHide : function(e) {return e["school"]==v;});});
+        $("#school").find("option:selected").removeAttr("selected");
+    </script>
 </body>
 </html>
