@@ -102,7 +102,7 @@
         $('select').material_select();
         $(".button-collapse").sideNav();
         var spells = {};
-        $.getJSON("../resource/spells.json", function(data) {
+        $.getJSON("/resource/spells.json", function(data) {
             spells = data;
             generateTable();
         });
