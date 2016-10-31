@@ -183,7 +183,7 @@
 
         function clearSpells() {
             if (confirm("Are you sure you want to clear the current spellbook?")) {
-                $.removeCookie("spellbook");
+                $.cookie("spellbook", "[]", {expires: 2147483647, path: '/'});
                 location.reload();
             }
         }
