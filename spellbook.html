@@ -2,145 +2,351 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Spells</title>
-    <link rel="stylesheet" href="resource/spellbook.css">
+    <!--<link rel="stylesheet" href="../resource/css/spells.css">-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
     <style>
-        th, td {
-            padding-bottom: 1em;
+        .select-wrapper span.caret {
+            top:0;
+        }
+        .sort {
+            cursor: pointer;
+        }
+        .btn {
+            background-color: #616161;
+        }
+        .btn:hover, .btn:focus {
+            background-color: #505050;
+        }
+        *:focus {
+            outline: none;
+        }
+        .card {
+            padding: 1em;
         }
     </style>
-    <script src="resource/jquery.min.js"></script>
-    <script src="resource/jquery.cookie.min.js"></script>
-    <script>
-        var spells = {};
-        $.getJSON("resource/spells.json", function(data) {
-            spells = data;
-            generatePage();
-        });
-
-        String.prototype.replaceAll = function(search, replacement) {
-            var target = this;
-            return target.replace(new RegExp(search, 'g'), replacement);
-        };
-
-        function sl(n) {
-            if(!n instanceof String) {
-                n = n.toString();
-            }
-            return n.replaceAll(" ", "-").replaceAll("'", "").replaceAll("\\(", "").replaceAll("\\)", "").replaceAll("/", "");
-        }
-
-        function addSpell(s) {
-            if (typeof $.cookie("spellbook") == "undefined") spellbook = [];
-            else var spellbook = JSON.parse($.cookie("spellbook"));
-            if (hasSpell(s)) spellbook.splice(spellbook.indexOf(s), 1);
-            else spellbook.push(s);
-            $.cookie("spellbook", JSON.stringify(spellbook), {expires: 100, path: '/'});
-        }
-
-        function hasSpell(s) {
-            if (typeof $.cookie("spellbook") == "undefined") return false;
-            var spellbook = JSON.parse($.cookie("spellbook"));
-            return spellbook.indexOf(s)!=-1;
-        }
-
-        function getSpells() {
-            var spellbook = [];
-            if (typeof $.cookie("spellbook") == "undefined") spellbook = [];
-            else spellbook = JSON.parse($.cookie("spellbook"));
-            return spellbook;
-        }
-
-        function clearSpells() {
-            if (confirm("Are you sure you want to clear the current spellbook?")) {
-                $.removeCookie("spellbook");
-                location.assign(location.href.substring(0,location.href.length-"/spellbook".length));
-            }
-        }
-
-        function getOrdinal(n) {
-            var s=["th","st","nd","rd"],
-                    v=n%100;
-            return n+(s[(v-20)%10]||s[v]||s[0]);
-        }
-
-        function generatePage() {
-            var ans = "<table>";
-
-            var spellbook = getSpells();
-
-            var toRow = 4;
-
-            for (var i = 0; i<spellbook.length; i++) {
-                var name = spellbook[i];
-                var card = generateCard(name);
-
-                if (i!=0 && i%toRow==0) ans+="</tr>";
-                if (i%toRow==0) ans+="<tr>";
-                ans+="<td>";
-                ans+=card;
-                ans+="</td>";
-
-            }
-
-            ans+="</table>";
-
-            $(".table").html(ans);
-        }
-
-        var colors = {
-            "Abjuration": "#e69900",
-            "Conjuration": "darkblue",
-            "Divination": "purple",
-            "Enchantment": "darkgreen",
-            "Evocation": "maroon",
-            "Illusion": "dodgerblue",
-            "Necromancy": "#000000",
-            "Transmutation": "#003300"
-        };
-
-        function generateCard(name) {
-            var spell = spells[name];
-            var level = spell["level"];
-            var fill = "<span class='card-fill'></span>";
-            var ruler = '<svg class="card-ruler" height="1" width="100" viewBox="0 0 100 1" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">    <polyline points="0,0 100,0.5 0,1" fill="'+colors[spell["school"]]+'"></polyline></svg>';
-            var title = level=="0" ? spell["school"]+" cantrip" : getOrdinal(level)+" level "+spell["school"].toLowerCase();
-            var ans = "<div class='card "+spell["school"].toLowerCase()+"'>";
-
-                ans+="<div class='card-title'>"+spell["name"]+"</div>";
-
-                ans+="<div class='card-content-container'>";
-
-                    ans+="<div class='card-element card-subtitle'>"+title+"</div>";
-                    ans+=ruler;
-                    ans+="<div class='card-element card-property-line'><h4 class='card-property-name'>Casting Time </h4><p class='card-p card-property-text'>"+spell["casting_time"]+"</p></div>";
-                    ans+="<div class='card-element card-property-line'><h4 class='card-property-name'>Duration </h4><p class='card-p card-property-text'>"+spell["duration"]+"</p></div>";
-                    ans+="<div class='card-element card-property-line'><h4 class='card-property-name'>Range </h4><p class='card-p card-property-text'>"+spell["range"]+"</p></div>";
-                    ans+="<div class='card-element card-property-line'><h4 class='card-property-name'>Components </h4><p class='card-p card-property-text'>"+spell["components"]+"</p></div>";
-                    ans+=ruler;
-                    ans+=fill;
-                    ans+="<div class='card-element card-description-line'><p class='card-p card-description-text'>"+spell["description"]+"</p></div>";
-                    ans+=fill;
-                    ans+="<h3 class='card-section'>At higher levels</h3>";
-                    ans+="<div class='card-element card-description-line'><p class='card-p card-description-text'>"+(spell["athigherlevel"].length<2 ? "No change." : spell["athigherlevel"])+"</p></div>";
-
-                ans+="</div>";
-                ans+="<div><em class='source'>"+spell["source"]+", page "+spell["page"]+"</em></div>";
-
-            ans+="</div>";
-
-            console.log("card:"+ans);
-
-            return ans;
-        }
-
-    </script>
 </head>
 <body>
+<div class="navbar-fixed">
+    <nav>
+        <div class="nav-wrapper row z-depth-4 grey darken-3">
+            <a href="#" data-activates="mobile-nav" class="button-collapse"><i class="material-icons">menu</i></a>
 
-    <div class="table">
+            <form id="sorters">
+                <div class="input-field col s2 m1 l1">
+                    <select id="level" class="c-select">
+                        <option value="-1">Level</option>
+                        <option value="0">Cantrip</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                    </select>
+                </div>
+                <div class="input-field col s2 m1 l1">
+                    <select id="class" class="c-select">
+                        <option>Class</option>
+                        <option>Bard</option>
+                        <option>Cleric</option>
+                        <option>Druid</option>
+                        <option>Paladin</option>
+                        <option>Ranger</option>
+                        <option>Sorcerer</option>
+                        <option>Warlock</option>
+                        <option>Wizard</option>
+                    </select>
+                </div>
+                <div class="input-field col s4 m2 l1">
+                    <select id="school" class="c-select">
+                        <option>School</option>
+                        <option>Abjuration</option>
+                        <option>Conjuration</option>
+                        <option>Divination</option>
+                        <option>Enchantment</option>
+                        <option>Evocation</option>
+                        <option>Illusion</option>
+                        <option>Necromancy</option>
+                        <option>Transmutation</option>
+                    </select>
+                </div>
+            </form>
+            <a class="brand-logo center"><b><em>Spellbook</em></b></a>
+            <ul class="right hide-on-med-and-down">
+                <li><a href="#" onclick="clearSpells();">Clear Spells</a></li>
+                <li><a href="#" onclick="changeView('');" id="changeView">View Spellbook Library</a></li>
+                <li><a href="spellbook.html">View Spell Cards</a></li>
+            </ul>
+            <ul class="side-nav" id="mobile-nav">
+                <li><a href="#" onclick="clearSpells();">Clear Spells</a></li>
+                <li><a href="#" onclick="changeView('2');" id="changeView2">View Spellbook Library</a></li>
+                <li><a href="spellbook.html">View Spell Cards</a></li>
+            </ul>
+        </div>
+    </nav>
+</div>
 
-    </div>
+<div class="table">
+</div>
 
+<script src="resource/jquery.min.js"></script>
+<script src="resource/jquery.cookie.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
+
+<script>
+    $('select').material_select();
+    $(".button-collapse").sideNav();
+    var spells = {};
+    $.getJSON("resource/spells.json", function(data) {
+        spells = data;
+        generateTable();
+    });
+
+    String.prototype.replaceAll = function(search, replacement) {
+        var target = this;
+        return target.replace(new RegExp(search, 'g'), replacement);
+    };
+    Array.prototype.remove = function(from, to) {
+        var rest = this.slice((to || from) + 1 || this.length);
+        this.length = from < 0 ? this.length + from : from;
+        return this.push.apply(this, rest);
+    };
+
+    function sl(n) {
+        if(!n instanceof String) {
+            n = n.toString();
+        }
+        return n.replaceAll(" ", "-").replaceAll("'", "").replaceAll("\\(", "").replaceAll("\\)", "").replaceAll("/", "");
+    }
+
+    function hide(id) {
+        $("#full-"+id).toggle();
+        var e = $("#"+id);
+        e.html(e.html()=="Show" ? "Hide" : "Show");
+    }
+
+    var sort = "name";
+    var reverse = false;
+
+    function noHide(element) {
+        return true;
+    }
+
+    var filters = {
+        "default": noHide
+    };
+
+    function isShown(element) {
+        for (var filter in filters) {
+            if (!filters[filter](element)) return false;
+        }
+        return true;
+    }
+
+    function setFilter(filter, func) {
+        console.log(filter);
+        filters[filter] = func;
+        generateTable();
+    }
+
+    function setSort(s) {
+        if (sort==s) reverse = !reverse;
+        sort = s;
+        generateTable();
+    }
+
+    function addSpell(s) {
+        var spellbook = [];
+        if (typeof $.cookie("spellbook") == "undefined") spellbook = [];
+        else spellbook = JSON.parse($.cookie("spellbook"));
+        if (hasSpell(s)) spellbook.splice(spellbook.indexOf(s), 1);
+        else spellbook.push(s);
+        $.cookie("spellbook", JSON.stringify(spellbook), {expires: 2147483647, path: '/'});
+    }
+
+    function hasSpell(s) {
+        if (typeof $.cookie("spellbook") == "undefined") return false;
+        var spellbook = JSON.parse($.cookie("spellbook"));
+        return spellbook.indexOf(s)!=-1;
+    }
+
+    function getSpells() {
+        var spellbook = [];
+        if (!($.cookie("spellbook") === undefined)) spellbook = JSON.parse($.cookie("spellbook"));
+        return spellbook;
+    }
+
+    function clearSpells() {
+        if (confirm("Are you sure you want to clear the current spellbook?")) {
+            $.cookie("spellbook", "[]", {expires: 2147483647, path: '/'});
+            location.reload();
+        }
+    }
+
+    var view = "spells";
+
+    function changeView(s) {
+        if (view=="spells") {
+            view = "spellbooks";
+            $("#changeView"+s).html("View Spell List");
+            $("#sorters").hide();
+            generateSpellbooks();
+        } else {
+            view = "spells";
+            $("#changeView"+s).html("View Spellbook Library");
+            $("#sorters").show();
+            generateTable();
+        }
+    }
+
+    function saveSpellbook(name) {
+        var spellbooks = getSpellbooks();
+        var sb = getSpells();
+        var contains = false;
+        for (var i = 0; i<spellbooks.length; i++) {
+            var s = spellbooks[i];
+            if (s[0]==name) {
+                s[1] = sb;
+                contains = true;
+            }
+        }
+        if (!contains) {
+            var a = [];
+            a.push(name);
+            a.push(sb);
+            spellbooks.push(a);
+        }
+        $.cookie("spellbooks", JSON.stringify(spellbooks), {expires: 2147483647, path: '/'});
+        generateSpellbooks();
+    }
+
+    function getSpellbooks() {
+        var spellbooks = {};
+        if ($.cookie("spellbooks") == undefined) spellbooks = [];
+        else spellbooks = JSON.parse($.cookie("spellbooks"));
+        return spellbooks;
+    }
+
+    function deleteSpellbook(name) {
+        var spellbooks = getSpellbooks();
+        if (!confirm("Are you sure you want to delete spellbook \""+name+"\"?")) return;
+        for (var i = 0; i<spellbooks.length; i++) {
+            var sb = spellbooks[i];
+            if (sb[0]==name) spellbooks.remove(i);
+        }
+        $.cookie("spellbooks", JSON.stringify(spellbooks), {expires: 2147483647, path: '/'});
+        generateSpellbooks();
+    }
+
+    function saveCurrentBook() {
+        var name = prompt("Choose a name for the spellbook.", "My Spellbook");
+        if (name==null || name.length==0) return;
+        saveSpellbook(name);
+    }
+
+    function loadSpellbook(name) {
+        if (!confirm("Are you sure you want to load spellbook \""+name+"\"? This will clear the current spellbook.")) return;
+        var spellbooks = getSpellbooks();
+        for (var i = 0; i<spellbooks.length; i++) {
+            if (spellbooks[i][0]==name) {
+                $.cookie("spellbook", JSON.stringify(spellbooks[i][1]));
+                generateSpellbooks();
+                return;
+            }
+        }
+    }
+
+    function generateSpellbooks() {
+        var spellList = getSpells();
+        var ans = "";
+        var spellbooks = getSpellbooks();
+
+        ans+="<div class='container'>";
+
+        ans+="<div class='card' style='text-align: center'><button type='button' class='btn' onclick='saveCurrentBook();'>Save Spellbook As...</button> <button type='button' class='btn' onclick='clearSpells();'>Clear Spells</button><h1 class='sb-name'>Current Spellbook</h1>";
+        ans+=generateSpellNames(spellList)+"</div>";
+
+        for (var i = 0; i<spellbooks.length; i++) {
+            var sb = spellbooks[i];
+            ans+="<div class='card' style='text-align: center'><button type='button' class='btn' onclick='deleteSpellbook(\""+sb[0]+"\");'>Delete Spellbook</button> <button type='button' class='btn' onclick='loadSpellbook(\""+sb[0]+"\");'>Load Spellbook</button><h1 class='sb-name'>"+sb[0]+"</h1>";
+            ans+=generateSpellNames(sb[1])+"</div>";
+        }
+
+        ans+="</div><div class='col-lg-2'></div>";
+
+        $(".table").html(ans);
+        $("#sort1").hide();
+        $("#sort2").hide();
+        $("#sort3").hide();
+    }
+
+    function generateSpellNames(spellbook) {
+        if (spellbook.length==0) return "<div style='text-align: center; font-size: 1.2em; font-weight: bold; font-style: italic'>No spells!</div>";
+        var ans = "<ul class='list-group' style='margin: auto; text-align: center;'>";
+        for (var i = 0; i<spellbook.length; i++) {
+            ans+="<li class='list-group-item' style='font-size: 1.2em; font-weight: bold; font-style: italic;'>"+spellbook[i]+"</li>";
+        }
+        ans+="</ul>";
+        return ans;
+    }
+
+    function generateTable() {
+        //sort based on sort variable and filter out those not allowed by isShown
+        var sortable=[];
+        for (var key in spells) if (spells.hasOwnProperty(key) && isShown(spells[key])) sortable.push([key, spells[key]]);
+        sortable.sort(function(a, b) {
+            return (reverse ? -1 : 1) * (a[1][sort] < b[1][sort] ? -1 : a[1][sort] > b[1][sort] ? 1 : 0); //if reverse is true, sort in the opposite direction.
+        });
+
+        var ans = "<table class='table'><thead class='thead-inverse'><tr><th>Full</th><th class='sort' onclick='setSort(\"name\");'>Name</th><th class='sort' onclick='setSort(\"level\");'>Level</th><th class='sort' onclick='setSort(\"school\");'>School</th><th class='sort' onclick='setSort(\"classes\");'>Classes</th><th>Spellbook</th></tr></thead>";
+
+        for (var i = 0; i<sortable.length; i++)  {
+            var arr = sortable[i];
+            var name = arr[0];
+            var spell = arr[1];
+            ans+="<tr>";
+            ans+="<td><button type='button' data-toggle='collapse' href='#full-"+sl(name)+"' class='btn' onclick='hide(\""+sl(name)+"\");' id=\""+sl(name)+"\" >Show</button></td>";
+            //ans+="<td><a href='#' data-activates='full-"+sl(name)+"' class='button-collapse'>test</a></td>";
+            ans+="<td data-toggle='tooltip' data-placement='right' title='"+(spell["description"].length>399 ? spell["description"].substr(0,400)+"..." : spell["description"])+"'>"+name+"</td>";
+            ans+="<td>"+(spell["level"]==0 ? "Cantrip" : spell["level"])+"</td>";
+            ans+="<td>"+spell["school"]+"</td>";
+            ans+="<td>"+spell["classes"].toString().replaceAll(",", ", ")+"</td>";
+            ans+="<td style='text-align: center;'><button type='button' class='btn'  id='b-"+sl(name)+"' onclick='var r = \"Remove\"; var a = \"Add\"; addSpell(\""+name+"\"); $(\"#b-"+sl(name)+"\").html((hasSpell(\""+name+"\") ? r : a))'>"+(hasSpell(name) ? "Remove" : "Add")+"</button>";
+            ans+="</tr>";
+
+            ans+="<tr id=\"full-"+sl(name)+"\" class='collapse' style='display:none;'><td colspan='100%' style='width:1em;' class='row'><blockquote><div class='col l8'>";
+
+            ans+="<b>Components: </b>"+spell["components"]+"<br/>";
+            ans+="<b>Duration:</b> "+spell["duration"]+"<br/>";
+            ans+="<b>Casting Time: </b>"+spell["casting_time"]+"<br/>";
+            ans+="<b>Range: </b>"+spell["range"]+"<br/>";
+            ans+="<b>Description:</b><br/>"+spell["description"]+"<br/>";
+            ans+="<b>At Higher Levels:</b><br/>"+(spell["athigherlevel"].length<2 ? "No change." : spell["athigherlevel"])+"<br/>";
+            ans+="<em style='font-size: .75em;'>Source: "+spell["source"]+", page "+spell["page"]+"</em><br/>";
+
+            ans+="</div></blockquote></td></tr>";
+            $("#sort1").show();
+            $("#sort2").show();
+            $("#sort3").show();
+        }
+
+        ans+="</table>";
+        $(".table").html(ans);
+        $(".button-collapse")
+    }
+</script>
+<script>
+    $("#level").change(function() { var v = $("#level").find("option:selected").val(); setFilter("level", v == "-1" ? noHide : function(e) {return e["level"] == v;}); });
+    $("#level").find("option:selected").removeAttr("selected");
+    $("#class").change(function() { var v = $("#class").find("option:selected").html(); setFilter("class", v=="Class" ? noHide : function(e) {return e["classes"].indexOf(v)>-1;});});
+    $("#class").find("option:selected").removeAttr("selected");
+    $("#school").change(function() { var v = $("#school").find("option:selected").html(); setFilter("school", v=="School" ? noHide : function(e) {return e["school"]==v;});});
+    $("#school").find("option:selected").removeAttr("selected");
+</script>
 </body>
 </html>
