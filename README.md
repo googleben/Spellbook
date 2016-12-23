@@ -1,2 +1,2 @@
 # Spellbook
-An HTML and JavaScript DnD Spellbook
+An HTML and JavaScript DnD Spellbook | http://googleben.github.io/Spellbook/
